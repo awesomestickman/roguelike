@@ -18,7 +18,7 @@ background(255);
 
 //class for everything on board
 class exist(){
-	int x = x;
+	int myX = x;
 	
 
 
