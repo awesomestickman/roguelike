@@ -19,6 +19,13 @@ space[][] level;
 
 int row=40;
 int col=40;
+int texty=15;
+int textxplus=13;
+int textyplus=13;
+int textx=15;
+
+//if its true turn false;
+boolean turn;
 
 //setup
 public void setup(){
@@ -27,6 +34,7 @@ public void setup(){
 level= new space[row][col];
 createSpace();
 createGrass();
+createStonewall();
 
 
 }
@@ -35,6 +43,9 @@ createGrass();
 public void draw(){
 background(255);
 updateall();
+
+
+
 
 }
 //create level
@@ -62,6 +73,9 @@ int myX,myY;
 boolean groundcheck;
 String groundtype;
 Object ground;
+boolean solidcheck;
+String solidtype;
+Object solid;
 
 public space(int x, int y){
 myX=x;
@@ -83,7 +97,7 @@ class exist{
 	public void drawself(){
 		fill(0);
 		textSize(20);
-		text(symbol,myX*8+10,myY*8+10);
+		text(symbol,myX*textx+textxplus,myY*texty+textyplus);
 	}
 	public void update(){
 
@@ -112,10 +126,116 @@ class ground extends exist{
 		public void drawself(){
 			fill(0,153,0);
 			textSize(20);
-			text(symbol,myX*8+10,myY*8+10);
+			text(symbol,myX*textx+textxplus,myY*texty+textyplus);
 		}
 	
 	}
+
+//for chars and walls
+class solid extends exist{
+
+
+
+
+}
+	class character extends solid{
+		int newX, newY;
+		boolean moving;
+
+		public void move(){
+			if(moving==true){
+
+
+
+
+				moving=false;
+			}
+
+
+		}
+
+
+	}
+		class wolf extends character{
+
+			public wolf(int x, int y){
+				myX=x;
+				myY=y;
+				symbol="w";
+			}
+
+
+
+
+		}
+		class player extends character{
+
+				int myUp;
+				int myDown;
+				int myLeft;
+				int myRight;
+
+
+			public player(int x, int y,int up,int down,int left,int right){
+				myX=x;
+				myY=y;
+				symbol="@";
+				myUp=up;
+				myDown=down;
+				myLeft=left;
+				myRight=right;
+			}
+			public void update(){
+
+				this.drawself();
+				this.keyReader();
+				if(turn==true){
+					this.move();
+				}
+
+			}
+			public void keyReader(){
+				
+
+					if(keyCode==myUp){
+
+					}
+					if(keyCode==myDown){
+						
+					}
+					if(keyCode==myLeft){
+						
+					}
+					if(keyCode==myRight){
+						
+					}
+
+
+				
+
+
+			}
+
+
+
+		}
+
+	class wall extends solid{
+
+
+
+
+
+	}
+		class stonewall extends wall{
+			public stonewall(int x, int y){
+
+				myX=x;
+				myY=y;
+				symbol="#";
+			}
+
+		}
 
 
 
@@ -130,21 +250,50 @@ public void createGrass(){
     		
     	}
 	}
+}
+
+public void createStonewall(){
+		for(int i =0;i<row;i++){
+	    	for(int r=0;r<col;r++){
+	    		int chance=(int)(Math.random()*7);
+	    		if(chance==6){
+
+	    		level[i][r].solidcheck=true;     
+	    		level[i][r].solidtype="stonewall"; 
+	    		level[i][r].solid= new stonewall(i,r);  
+	    		}
+	    	}
+		}
 
 
-
+}
+public void createWolf(){
 
 }
 
 public void updateall(){
 	for(int i =0;i<row;i++){
     	for(int r=0;r<col;r++){
+    		if(level[i][r].solidcheck==true){
+    			if(level[i][r].solidtype=="stonewall"){
+    				((stonewall)level[i][r].solid).update();
+    				
+    				}
+    			
 
-    		if(level[i][r].groundcheck==true){
-    			if(level[i][r].groundtype=="grass"){
+
+
+
+
+    		}
+
+
+
+    		else if(level[i][r].groundcheck==true){
+    				if(level[i][r].groundtype=="grass"){
     				((grass)level[i][r].ground).update();
     				
-    			}
+    				}
 
 
 
@@ -156,11 +305,21 @@ public void updateall(){
     	}
 	}
 
+if(turn==true){
+
+	turn =false;
+}
+
+
+
+}
+
+public void keyPressed(){
 
 
 }
   public void settings() { 
-size(400,400); }
+size(800,800); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "roguelike" };
     if (passedArgs != null) {
