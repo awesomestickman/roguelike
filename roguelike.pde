@@ -12,6 +12,8 @@ boolean keyreset=true;
 
 //if its true turn false;
 boolean turn;
+boolean keyHolder;
+
 
 //setup
 public void setup(){
@@ -21,6 +23,7 @@ level= new space[row][col];
 createSpace();
 createGrass();
 createStonewall();
+createRacoon();
 createPlayer();
 
 }
@@ -119,7 +122,7 @@ class ground extends exist{
 
 //for chars and walls
 class solid extends exist{
-
+boolean myTurn;
 
 
 
@@ -127,20 +130,23 @@ class solid extends exist{
 	class character extends solid{
 		int newX, newY;
 		boolean moving;
+		
 
 		public void move(){
+
 			if(moving==true){
+
 				if(isValid(newX,newY)){
 					if(level[newX][newY].solidcheck==false){
 
-
+						String typeHolder=level[myX][myY].solidtype;
 						level[myX][myY].solidcheck=false;     
 						myX=newX;
 						myY=newY;
 						level[myX][myY].solidcheck=true;     
-						level[myX][myY].solidtype="player"; 
+						level[myX][myY].solidtype=typeHolder; 
 						level[myX][myY].solid=this;
-
+						myTurn=false;
 
 
 					}
@@ -150,18 +156,61 @@ class solid extends exist{
 
 
 		}
+		public void update(){
+
+			this.drawself();
+			
+			if(myTurn==true){
+				this.ai();
+				this.move();
+				
+			}
+
+		}
+		public void ai(){
+
+
+		}
 
 
 	}
-		class wolf extends character{
+		class racoon extends character{
 
-			public wolf(int x, int y){
+			public racoon(int x, int y){
 				myX=x;
 				myY=y;
-				symbol="w";
+				symbol="r";
 			}
 
+			public void ai(){
+				moving=true;
+				int randNum=(int)(Math.random()*4);
+				
+					if(randNum==0){
+						newX=myX-1;
+						newY=myY;
 
+					}
+					if(randNum==1){
+						newX=myX+1;
+						newY=myY;
+						
+					}
+					if(randNum==2){
+						newX=myX;
+						newY=myY-1;
+						
+					}
+					if(randNum==3){
+						newX=myX;
+						newY=myY+1;
+						
+					}
+
+				}
+
+
+			
 
 
 		}
@@ -186,9 +235,9 @@ class solid extends exist{
 
 				this.drawself();
 				this.keyReader();
-				if(turn==true){
-					this.move();
-				}
+				if(myTurn==true){
+				this.move();
+			}
 
 			}
 			public void keyReader(){
@@ -213,7 +262,7 @@ class solid extends exist{
 						this.newY=myY;
 					}
 					moving=true;
-						turn=true;
+						
 					keyreset=false;
 
 				}
@@ -272,8 +321,18 @@ public void createStonewall(){
 
 
 }
-public void createWolf(){
+public void createRacoon(){
+			for(int i =0;i<row;i++){
+		    	for(int r=0;r<col;r++){
+		    		int chance=(int)(Math.random()*100);
+		    		if(chance==6){
 
+		    		level[i][r].solidcheck=true;     
+		    		level[i][r].solidtype="racoon"; 
+		    		level[i][r].solid= new racoon(i,r);  
+		    		}
+		    	}
+			}
 }
 public void createPlayer(){
 	int spawnx=col/2;
@@ -285,6 +344,28 @@ public void createPlayer(){
 }
 ////////////////////////////////////////////////////////////////////////
 public void updateall(){
+	if(keyHolder==false){
+
+
+	
+		if(keyPressed){
+			turn=true;
+			keyHolder=true;
+		}
+	}	
+	//turn good
+	if(turn==true){
+		for(int i =0;i<row;i++){
+	    	for(int r=0;r<col;r++){
+	    		if(level[i][r].solidcheck==true){
+	    			((solid)level[i][r].solid).myTurn=true;
+
+	    		}    
+	    		  
+	    	}
+		}
+	}	
+	//update
 	for(int i =0;i<row;i++){
     	for(int r=0;r<col;r++){
     		if(level[i][r].solidcheck==true){
@@ -294,6 +375,10 @@ public void updateall(){
     				}
     			if(level[i][r].solidtype=="player"){
     				((player)level[i][r].solid).update();
+    				
+    				}
+    			if(level[i][r].solidtype=="racoon"){
+    				((racoon)level[i][r].solid).update();
     				
     				}
     			
@@ -344,4 +429,5 @@ public boolean isValid(int x,int y){
 public void keyReleased(){
 
 	keyreset=true;
+	keyHolder=false;
 }
