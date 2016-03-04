@@ -24,6 +24,7 @@ createSpace();
 createGrass();
 createStonewall();
 createRacoon();
+createDino();
 createPlayer();
 
 }
@@ -65,6 +66,9 @@ Object ground;
 boolean solidcheck;
 String solidtype;
 Object solid;
+///dfs help
+boolean checked;
+
 
 public space(int x, int y){
 myX=x;
@@ -214,6 +218,25 @@ boolean myTurn;
 
 
 		}
+		class dino extends character{
+			public dino(int x, int y){
+				myX=x;
+				myY=y;
+				symbol="d";
+			}
+			public void ai(){
+
+
+
+
+
+			}
+
+
+
+
+
+		}
 		class player extends character{
 
 				int myUp;
@@ -296,8 +319,8 @@ boolean myTurn;
 public void createGrass(){
 
 	for(int i =0;i<row;i++){
-    	for(int r=0;r<col;r++){
 
+    	for(int r=0;r<col;r++){
     		level[i][r].groundcheck=true;     
     		level[i][r].groundtype="grass"; 
     		level[i][r].ground= new grass(i,r);  
@@ -324,12 +347,25 @@ public void createStonewall(){
 public void createRacoon(){
 			for(int i =0;i<row;i++){
 		    	for(int r=0;r<col;r++){
-		    		int chance=(int)(Math.random()*100);
+		    		int chance=(int)(Math.random()*200);
 		    		if(chance==6){
 
 		    		level[i][r].solidcheck=true;     
 		    		level[i][r].solidtype="racoon"; 
 		    		level[i][r].solid= new racoon(i,r);  
+		    		}
+		    	}
+			}
+}
+public void createDino(){
+			for(int i =0;i<row;i++){
+		    	for(int r=0;r<col;r++){
+		    		int chance=(int)(Math.random()*200);
+		    		if(chance==6){
+
+		    		level[i][r].solidcheck=true;     
+		    		level[i][r].solidtype="dino"; 
+		    		level[i][r].solid= new dino(i,r);  
 		    		}
 		    	}
 			}
@@ -381,6 +417,10 @@ public void updateall(){
     				((racoon)level[i][r].solid).update();
     				
     				}
+    			if(level[i][r].solidtype=="dino"){
+    				((dino)level[i][r].solid).update();
+    				
+    				}
     			
 
 
@@ -430,4 +470,33 @@ public void keyReleased(){
 
 	keyreset=true;
 	keyHolder=false;
+}
+
+
+public int[] dfsParent(int x, int y){
+	//some ints
+	
+	int[] returnPair= {x,y};
+
+	//refresh all checked
+	for(int i =0;i<row;i++){
+
+    	for(int r=0;r<col;r++){
+    		level[i][r].checked=false;
+    	}
+    }     
+    //if dfs is not -1, return good coords
+    if(dfs(x,y) != {-1} ){
+		returnPair=dfs(x,y);
+	}
+
+	return returnPair;
+
+}
+public int[] dfs(int x,int y){
+
+	int[] returnPair={-1};
+
+
+	return returnPair;
 }
