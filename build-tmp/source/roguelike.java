@@ -39,7 +39,7 @@ level= new space[row][col];
 createSpace();
 createGrass();
 createStonewall();
-//createRacoon();
+createRacoon();
 createDino();
 createPlayer();
 
@@ -83,7 +83,7 @@ Object ground;
 boolean solidcheck;
 String solidtype;
 Object solid;
-///dfs help
+///pathfinding help
 boolean checked;
 
 
@@ -184,7 +184,7 @@ boolean myTurn;
 			
 			if(myTurn==true){
 				this.ai();
-				System.out.println(newX+" "+newY);
+				//System.out.println(newX+" "+newY);
 				this.move();
 				myTurn=false;
 				
@@ -250,13 +250,20 @@ boolean myTurn;
 				moving=true;
 				int targetx=myX;
 				int targety=myY;
-				
-				if(nextx>=0){
+				if( (Math.abs(targetx-myX)==1&&targety==myY)||
+					(Math.abs(targety-myY)==1&&targetx==myX) ){
+					newX=targetx;
+					newY=targety;
+					nextx=-1;
+
+				}
+
+				else if(nextx>=0){
 					newX=nextx;
 					newY=nexty;
 					nextx=-1;
 				}
-				if(1==1){
+				else{
 					
 						for(int i =0;i<row;i++){
 		    				for(int r=0;r<col;r++){
@@ -280,6 +287,17 @@ boolean myTurn;
 						nextx=pathfound[2];
 						nexty=pathfound[3];
 					
+					}
+					//uh hopefully solves some pathfinding bugs
+					if(targety<myY){
+						int gen=(int)(Math.random()*2);
+						if(gen==0){
+
+							newX=myX;
+							newY=myY-1;
+							nextx=-1;
+						}
+
 					}
 				}
 
@@ -410,21 +428,21 @@ public void createRacoon(){
 			}
 }
 public void createDino(){
-			// for(int i =0;i<row;i++){
-		 //    	for(int r=0;r<col;r++){
-		 //    		int chance=(int)(Math.random()*200);
-		 //    		if(chance==6){
+			for(int i =0;i<row;i++){
+		    	for(int r=0;r<col;r++){
+		    		int chance=(int)(Math.random()*200);
+		    		if(chance==6){
 
-		 //    		level[i][r].solidcheck=true;     
-		 //    		level[i][r].solidtype="dino"; 
-		 //    		level[i][r].solid= new dino(i,r);  
-		 //    		}
-		 //    	}
-			// }
-			int whev=15;
-			level[whev][whev].solidcheck=true;     
-		 	level[whev][whev].solidtype="dino"; 
-		 	level[whev][whev].solid= new dino(whev,whev);  
+		    		level[i][r].solidcheck=true;     
+		    		level[i][r].solidtype="dino"; 
+		    		level[i][r].solid= new dino(i,r);  
+		    		}
+		    	}
+			}
+			// int whev=15;
+			// level[whev][whev].solidcheck=true;     
+		 // 	level[whev][whev].solidtype="dino"; 
+		 // 	level[whev][whev].solid= new dino(whev,whev);  
 }
 public void createPlayer(){
 	int spawnx=col/2;
