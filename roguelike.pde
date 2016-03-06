@@ -23,7 +23,7 @@ level= new space[row][col];
 createSpace();
 createGrass();
 createStonewall();
-createRacoon();
+//createRacoon();
 createDino();
 createPlayer();
 
@@ -32,6 +32,7 @@ createPlayer();
 //draw
 public void draw(){
 background(255);
+//background(0);
 updateall();
 
 
@@ -89,6 +90,7 @@ class exist{
 
 	public void drawself(){
 		fill(0);
+		//fill(255);
 		textSize(20);
 		text(symbol,myX*textx+textxplus,myY*texty+textyplus);
 	}
@@ -166,7 +168,9 @@ boolean myTurn;
 			
 			if(myTurn==true){
 				this.ai();
+				System.out.println(newX+" "+newY);
 				this.move();
+				myTurn=false;
 				
 			}
 
@@ -219,19 +223,51 @@ boolean myTurn;
 
 		}
 		class dino extends character{
+			int nextx=-1;
+			int nexty=-1;
 			public dino(int x, int y){
 				myX=x;
 				myY=y;
 				symbol="d";
 			}
 			public void ai(){
-
-
-
-
+				moving=true;
+				int targetx=myX;
+				int targety=myY;
+				
+				if(nextx>=0){
+					newX=nextx;
+					newY=nexty;
+					nextx=-1;
+				}
+				if(1==1){
+					
+						for(int i =0;i<row;i++){
+		    				for(int r=0;r<col;r++){
+		    					if(level[i][r].solidcheck==true){
+		    						if(level[i][r].solidtype=="player"){
+	    								targetx=((player)level[i][r].solid).myX;
+	    								targety=((player)level[i][r].solid).myY;
+	    				
+	    							}
+		    					}    
+		    		  
+		    				}
+						}
+					
+					int[] currentpos={myX,myY};	
+					node startoff=new node(currentpos);
+					int[] pathfound=bfs(startoff,targetx,targety);
+					if(pathfound.length==4){
+						newX=pathfound[0];
+						newY=pathfound[1];
+						nextx=pathfound[2];
+						nexty=pathfound[3];
+					
+					}
+				}
 
 			}
-
 
 
 
@@ -358,17 +394,21 @@ public void createRacoon(){
 			}
 }
 public void createDino(){
-			for(int i =0;i<row;i++){
-		    	for(int r=0;r<col;r++){
-		    		int chance=(int)(Math.random()*200);
-		    		if(chance==6){
+			// for(int i =0;i<row;i++){
+		 //    	for(int r=0;r<col;r++){
+		 //    		int chance=(int)(Math.random()*200);
+		 //    		if(chance==6){
 
-		    		level[i][r].solidcheck=true;     
-		    		level[i][r].solidtype="dino"; 
-		    		level[i][r].solid= new dino(i,r);  
-		    		}
-		    	}
-			}
+		 //    		level[i][r].solidcheck=true;     
+		 //    		level[i][r].solidtype="dino"; 
+		 //    		level[i][r].solid= new dino(i,r);  
+		 //    		}
+		 //    	}
+			// }
+			int whev=15;
+			level[whev][whev].solidcheck=true;     
+		 	level[whev][whev].solidtype="dino"; 
+		 	level[whev][whev].solid= new dino(whev,whev);  
 }
 public void createPlayer(){
 	int spawnx=col/2;
@@ -473,30 +513,128 @@ public void keyReleased(){
 }
 
 
-public int[] dfsParent(int x, int y){
-	//some ints
-	
-	int[] returnPair= {x,y};
+class node{
+	int[] position={0,0};
+	Object myParent;
+	boolean hasparent;
+	node(int[] coords, Object parent){
+		position=coords;
+		myParent=parent;
+		hasparent=true;
+	}
+	node(int[] coords){
+		position=coords;
+		hasparent=false;
+	}
+}
 
-	//refresh all checked
+public int[] bfs(Object start,int goalx,int goaly){
+	///bredth first search
+	//problem:depends on order of nodes because he may just cahnge his course once he goes 
+	//to the next square in a sequence, sending him back to start rip
+	int x;
+	int y;
+
+	boolean goalcheck=false;
+	
+	Object goalnode=start;
+	Object nextstepnode=start;
+	Object secondstep=start;
 	for(int i =0;i<row;i++){
 
     	for(int r=0;r<col;r++){
     		level[i][r].checked=false;
     	}
     }     
-    //if dfs is not -1, return good coords
-    if(dfs(x,y) != {-1} ){
-		returnPair=dfs(x,y);
+	int[] returner = {
+		((node)start).position[0], 
+		((node)start).position[1],
+		((node)start).position[0],
+		((node)start).position[1]};
+	ArrayList <node> theList= new ArrayList <node>();
+	ArrayList <node> thePath= new ArrayList <node>();
+	theList.add(((node)start));
+	while(theList.size()>0){
+		
+		node tempNode=theList.get(0);
+		theList.remove(0);
+		level[tempNode.position[0]][tempNode.position[1]].checked=true;
+
+		y=tempNode.position[1];
+		x =tempNode.position[0];
+
+
+		int where=0;
+		if(theList.size()>1){
+		 	
+			where=theList.size()-1;
+			
+				    						
+		}
+			for(int i =y-1;i<y+2;i++){
+
+		    	for(int r=x-1;r<x+2;r++){
+		    		//only concerned with certain tiles
+		    		if( (r==x-1&&i==y)||
+		    			(r==x+1&&i==y)||
+		    			(r==x&&i==y+1)||
+		    			(r==x&&i==y-1)){
+
+
+			    				//if checked
+
+			    			if(isValid(r,i)){
+			    				if(level[r][i].solidtype!="stonewall"
+			    					&&level[r][i].solidtype!="racoon"){
+				    				if(level[r][i].checked==false){
+				    					level[r][i].checked=true;
+				    					int[] newcoord={r,i};
+				    					if(newcoord[0]==goalx&&newcoord[1]==goaly){
+				    						goalcheck=true;
+				    						////maybe finicky for attack
+				    						goalnode=tempNode;
+				    						break;
+				    					}
+				    						
+				    						theList.add(where,new node(newcoord,tempNode));
+				    					
+
+
+				    				}
+								}
+							}
+				  	}		
+				}
+			}
 	}
 
-	return returnPair;
+	if(goalcheck==true){
 
-}
-public int[] dfs(int x,int y){
+		while(((node)goalnode).hasparent==true){
+			thePath.add(0,(node)goalnode);
+			goalnode=((node)goalnode).myParent;
 
-	int[] returnPair={-1};
+		}
+		if(thePath.size()>0){
+			nextstepnode=thePath.get(0);
+			if(thePath.size()>1){
+				secondstep=thePath.get(1);
+			}
+			//lol go all the way out then back in
+			// for(int i=0;i<thePath.size();i++){
+
+			// 	node debug=thePath.get(i);
+			// 	System.out.println(i+" "+((node)debug).position[0]+","+((node)debug).position[1]);
+			// }
+		}
+		returner[0]=((node)nextstepnode).position[0];
+		returner[1]=((node)nextstepnode).position[1];
+		returner[2]=((node)secondstep).position[0];
+		returner[3]=((node)secondstep).position[1];
+		
+		
+	}
 
 
-	return returnPair;
+	return returner;
 }
