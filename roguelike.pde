@@ -1,6 +1,7 @@
 
 space[][] level;
 
+//WARNING col=row, row=col
 int row=40;
 int col=40;
 int texty=15;
@@ -25,7 +26,7 @@ createGrass();
 createStonewall();
 //createRacoon();
 //createDino();
-createAnteater();
+//createAnteater();
 createPlayer();
 
 }
@@ -61,6 +62,7 @@ public void createSpace(){
 //class for grid container
 class space{
 
+boolean visible;
 int myX,myY;
 boolean groundcheck;
 String groundtype;
@@ -97,8 +99,9 @@ class exist{
 	}
 	public void update(){
 
-
+		if(level[myX][myY].visible==true){
 		this.drawself();
+	}
 	}
 }
 
@@ -137,6 +140,7 @@ boolean myTurn;
 	class character extends solid{
 		int newX, newY;
 		boolean moving;
+		int myFOV=10;
 		
 
 		public void move(){
@@ -165,7 +169,9 @@ boolean myTurn;
 		}
 		public void update(){
 
-			this.drawself();
+			if(level[myX][myY].visible==true){
+				this.drawself();
+			}
 			
 			if(myTurn==true){
 				this.ai();
@@ -496,6 +502,7 @@ public void createPlayer(){
 }
 ////////////////////////////////////////////////////////////////////////
 public void updateall(){
+	//obscure turn sorter with player
 	if(keyHolder==false){
 
 
@@ -517,56 +524,138 @@ public void updateall(){
 	    	}
 		}
 	}	
+//////////////////////////////////VISION
+///////////////////////////////////////
+//first set all to unvisible
+for(int i =0;i<row;i++){
+    	for(int r=0;r<col;r++){
+	    		level[i][r].visible=false;
+	    }
+}
+
+//then calculate LOS
+for(int i =0;i<row;i++){
+    	for(int r=0;r<col;r++){
+	    		if(level[i][r].solidcheck==true){
+	    			if(level[i][r].solidtype=="player"){
+	    				
+	    				int fov=((player)level[i][r].solid).myFOV/2;
+	    				int x=((player)level[i][r].solid).myX;
+	    				int y=((player)level[i][r].solid).myY;
+	    					//getting fov
+	    				for(int p =x-fov;p<x+fov;p++){
+    						for(int q=y-fov;q<y+fov;q++){
+    							if(isValid(p,q)){
+    								//then checking los
+    								float m;
+    									if(x-p!=0){
+		    								m=((y-q)/(x-p));
+		    							}
+		    							else{
+		    								m=0;
+		    							}
+		    							//check right quadrant
+		    							//will cancel fov so saty in right quadrant
+		    							int right=0;
+		    							int left=0;
+		    							int up=0;
+		    							int down=0;
+		    							if(p<x){
+		    								left=fov;
+		    							}
+		    							if(p>x){
+		    								right=fov;
+		    							}
+		    							if(q<y){
+		    								up=fov;
+		    							}
+		    							if(q>y){
+		    								down=fov;
+		    							}
+
+		    							boolean clear=true;
+		    								for(int n =x-fov+right;n<x+fov-left;n++){
+    											for(int o=y-fov+down;o<y+fov-up;o++){
+    												if(isValid(n,o)){
+    												//if on line
+    												if(o-y==m*(n-x)){
+    													if(level[n][o].solidcheck==true){
+		    												if(level[n][o].solidtype=="stonewall"){
+		    													if(sqrt(sq(n-x)+sq(o-y))<sqrt(sq(p-x)+sq(q-y))){
+		    														clear=false;
+		    														break;
+
+
+		    													}
+		    												}
+		    											}
+		    										}
+		    									}
+		    									}
+		    								}
+		    								if(clear==true){
+
+		    									level[p][q].visible=true;
+		    								}
+		    					}
+		    				}
+		    			}
+
+
+
+	    				
+	    			}
+	    		}
+	    }
+}
+
 	//update
 	for(int i =0;i<row;i++){
     	for(int r=0;r<col;r++){
-    		if(level[i][r].solidcheck==true){
-    			if(level[i][r].solidtype=="stonewall"){
-    				((stonewall)level[i][r].solid).update();
-    				
-    				}
-    			if(level[i][r].solidtype=="player"){
-    				((player)level[i][r].solid).update();
-    				
-    				}
-    			if(level[i][r].solidtype=="racoon"){
-    				((racoon)level[i][r].solid).update();
-    				
-    				}
-    			if(level[i][r].solidtype=="dino"){
-    				((dino)level[i][r].solid).update();
-    				
-    				}
-    			if(level[i][r].solidtype=="anteater"){
-    				((anteater)level[i][r].solid).update();
-    				
-    				}
+    		
+	    		if(level[i][r].solidcheck==true){
+	    			if(level[i][r].solidtype=="stonewall"){
+	    				((stonewall)level[i][r].solid).update();
+	    				
+	    				}
+	    			if(level[i][r].solidtype=="player"){
+	    				((player)level[i][r].solid).update();
+	    				
+	    				}
+	    			if(level[i][r].solidtype=="racoon"){
+	    				((racoon)level[i][r].solid).update();
+	    				
+	    				}
+	    			if(level[i][r].solidtype=="dino"){
+	    				((dino)level[i][r].solid).update();
+	    				
+	    				}
+	    			if(level[i][r].solidtype=="anteater"){
+	    				((anteater)level[i][r].solid).update();
+	    				
+	    				}
     			
 
 
 
 
 
-    		}
+    			}
+    		
 
 
+	    		else if(level[i][r].groundcheck==true){
+	    				if(level[i][r].groundtype=="grass"){
+	    				((grass)level[i][r].ground).update();
+	    				
+	    				}
 
-    		else if(level[i][r].groundcheck==true){
-    				if(level[i][r].groundtype=="grass"){
-    				((grass)level[i][r].ground).update();
-    				
-    				}
-
-
-
-
-    			
-
-    		}      
+	    		}   
+    		   
     		  
     	}
 	}
-
+//turn flipper
 if(turn==true){
 
 	turn =false;
