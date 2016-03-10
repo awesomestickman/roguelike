@@ -17,6 +17,10 @@ public class roguelike extends PApplet {
 
 space[][] level;
 
+//////global counter for bresenham
+int bresCounter=0;
+
+
 //WARNING col=row, row=col
 int row=40;
 int col=40;
@@ -42,7 +46,7 @@ createGrass();
 createStonewall();
 //createRacoon();
 //createDino();
-//createAnteater();
+createAnteater();
 createPlayer();
 
 }
@@ -157,13 +161,28 @@ boolean myTurn;
 		int newX, newY;
 		boolean moving;
 		int myFOV=10;
-		
+		//actual stats
+		int hp;
 
 		public void move(){
 
 			if(moving==true){
 
 				if(isValid(newX,newY)){
+					if(level[newX][newY].solidcheck==true){
+
+						     
+						if(level[newX][newY].solidtype=="player"){
+							((player)level[newX][newY].solid).hp--;
+
+						} 
+						
+
+
+					}
+
+
+
 					if(level[newX][newY].solidcheck==false){
 
 						String typeHolder=level[myX][myY].solidtype;
@@ -177,6 +196,7 @@ boolean myTurn;
 
 
 					}
+					
 				}	
 				moving=false;
 			}
@@ -351,6 +371,12 @@ boolean myTurn;
 						
 					
 					}
+					//soo attacks when next to
+					if((abs(targetx-myX)==1&&targety==myY)||(abs(targety-myY)==1&&targetx==myX)){
+
+						newX=targetx;
+						newY=targety;
+					}
 
 			}
 		}
@@ -360,7 +386,8 @@ boolean myTurn;
 				int myDown;
 				int myLeft;
 				int myRight;
-
+				//actual stats
+				
 
 			public player(int x, int y,int up,int down,int left,int right){
 				myX=x;
@@ -370,16 +397,25 @@ boolean myTurn;
 				myDown=down;
 				myLeft=left;
 				myRight=right;
+				hp=10;
 			}
 			public void update(){
 
 				this.drawself();
 				this.keyReader();
 				if(myTurn==true){
-				this.move();
-			}
+					this.move();
+				}
 
 			}
+
+			public void drawself(){
+				fill(0);
+				textSize(20);
+				text(symbol,myX*textx+textxplus,myY*texty+textyplus);
+				text("hp: "+hp,700,100);
+			}
+
 			public void keyReader(){
 				if(keyPressed&&keyreset){
 
@@ -563,56 +599,54 @@ for(int i =0;i<row;i++){
     						for(int q=y-fov;q<y+fov;q++){
     							if(isValid(p,q)){
     								//then checking los
-    								float m;
-    									if(x-p!=0){
-		    								m=((y-q)/(x-p));
-		    							}
-		    							else{
-		    								m=0;
-		    							}
-		    							//check right quadrant
-		    							//will cancel fov so saty in right quadrant
-		    							int right=0;
-		    							int left=0;
-		    							int up=0;
-		    							int down=0;
-		    							if(p<x){
-		    								left=fov;
-		    							}
-		    							if(p>x){
-		    								right=fov;
-		    							}
-		    							if(q<y){
-		    								up=fov;
-		    							}
-		    							if(q>y){
-		    								down=fov;
-		    							}
+    								
+		    							int[][] shadow = bresenham(i,r,p,q);
+		    							
 
-		    							boolean clear=true;
-		    								for(int n =x-fov+right;n<x+fov-left;n++){
-    											for(int o=y-fov+down;o<y+fov-up;o++){
-    												if(isValid(n,o)){
-    												//if on line
-    												if(o-y==m*(n-x)){
-    													if(level[n][o].solidcheck==true){
-		    												if(level[n][o].solidtype=="stonewall"){
-		    													if(sqrt(sq(n-x)+sq(o-y))<sqrt(sq(p-x)+sq(q-y))){
-		    														clear=false;
-		    														break;
+		    							int clear=0;
+										//if block is visible
+		    							boolean front=false;
 
+		    								for(int n =0;n<shadow.length;n++){
+    												int shadowx=shadow[n][0];
+    												int shadowy=shadow[n][1];
+    												
+    												int endarray=0;
+    												if(shadowx==0&&shadowy==0){
+    													endarray=n;
 
-		    													}
+    												}
+
+    													if(level[shadowx][shadowy].solidcheck==true){
+		    												if(level[shadowx][shadowy].solidtype=="stonewall"){
+		    														//so can see what cause shadow
+		    														
+		    														clear++;
+		    														if(shadowx==p&&shadowy==q){
+
+		    															front=true;
+
+		    														}
+		    														
+		    														if(clear>2){
+
+		    															break;
+		    														}
+
 		    												}
 		    											}
-		    										}
-		    									}
-		    									}
-		    								}
-		    								if(clear==true){
+		    										
 
-		    									level[p][q].visible=true;
 		    								}
+		    								if(front==true&&clear<2){
+		    										level[p][q].visible=true;
+		    									}
+		    								if(clear<1){
+		    									
+		    									level[p][q].visible=true;
+		    									
+		    								}
+
 		    					}
 		    				}
 		    			}
@@ -955,6 +989,50 @@ public int[] astar(Object start,int goalx,int goaly){
 
 
 	return returner;
+}
+
+public int[][] bresenham(int x0,int y0,int x1, int y1){
+  int[][] returner=new int[col][row];
+  int[][] backup ={};
+  
+  int dx=abs(x1-x0);
+  int dy=-abs(y1-y0);
+  //tracks how off of pure line it is
+  int error=dx+dy;
+  int e2;
+  ///adjust for diff quadrants if x<x1 true:1 false:-1
+  int sx = x0 < x1 ? 1 : -1; 
+  int sy = y0 < y1 ? 1 : -1; 
+
+
+  int y=y0;
+  int x=x0;
+  int counter=-1;
+   for(;;){  /* loop */
+      counter++;
+      bresCounter=counter;
+      returner[counter][0]=x;
+       returner[counter][1]=y;
+      
+      if (x==x1 && y==y1) break;
+      e2 = 2*error;
+      if (e2 >= dy) { error += dy; x += sx; } /* e_xy+e_x > 0 */
+      if (e2 <= dx) { error += dx; y += sy; } /* e_xy+e_y < 0 */
+   }
+
+  
+  
+  
+  
+  return returner;
+}
+
+public int sign(int x){
+ if(x<0)
+   return -1;
+ 
+  return 1;
+  
 }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "roguelike" };
