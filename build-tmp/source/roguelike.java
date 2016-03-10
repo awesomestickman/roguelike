@@ -38,7 +38,7 @@ boolean keyHolder;
 
 //setup
 public void setup(){
-size(800,800);
+
 
 level= new space[row][col];
 createSpace();
@@ -81,8 +81,11 @@ public void createSpace(){
 
 //class for grid container
 class space{
-
+//if in fov
 boolean visible;
+//if seen
+boolean seen;
+//other
 int myX,myY;
 boolean groundcheck;
 String groundtype;
@@ -160,7 +163,7 @@ boolean myTurn;
 	class character extends solid{
 		int newX, newY;
 		boolean moving;
-		int myFOV=10;
+		int myFOV=20;
 		//actual stats
 		int hp;
 
@@ -1034,6 +1037,8 @@ public int sign(int x){
   return 1;
   
 }
+  public void settings() { 
+size(800,800); }
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "roguelike" };
     if (passedArgs != null) {

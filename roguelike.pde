@@ -147,7 +147,7 @@ boolean myTurn;
 	class character extends solid{
 		int newX, newY;
 		boolean moving;
-		int myFOV=10;
+		int myFOV=20;
 		//actual stats
 		int hp;
 
