@@ -149,7 +149,9 @@ boolean myTurn;
 		boolean moving;
 		int myFOV=20;
 		//actual stats
-		int hp;
+		int hp=1;
+		int attack=1;
+		int defense=0;
 
 		public void move(){
 
@@ -160,7 +162,11 @@ boolean myTurn;
 
 						     
 						if(level[newX][newY].solidtype=="player"){
-							((player)level[newX][newY].solid).hp--;
+							((player)level[newX][newY].solid).hp-=attack;
+
+						} 
+						if(level[newX][newY].solidtype=="anteater"){
+							((anteater)level[newX][newY].solid).hp-=attack;
 
 						} 
 						
@@ -203,11 +209,20 @@ boolean myTurn;
 				myTurn=false;
 				
 			}
+			checkDeath();
 
 		}
 		public void ai(){
 
 
+		}
+		public void checkDeath(){
+
+			if(hp<=0){
+				level[myX][myY].solidcheck=false;
+
+
+			}
 		}
 
 
@@ -326,6 +341,8 @@ boolean myTurn;
 				myX=x;
 				myY=y;
 				symbol="a";
+				hp=5;
+				attack=1;
 			}
 			public void ai(){
 				moving=true;
@@ -373,6 +390,7 @@ boolean myTurn;
 				int myDown;
 				int myLeft;
 				int myRight;
+
 				//actual stats
 				
 
@@ -385,6 +403,7 @@ boolean myTurn;
 				myLeft=left;
 				myRight=right;
 				hp=10;
+				attack=1;
 			}
 			public void update(){
 
@@ -392,7 +411,10 @@ boolean myTurn;
 				this.keyReader();
 				if(myTurn==true){
 					this.move();
+					//regenerate health
+					//this.hp++;
 				}
+				checkDeath();
 
 			}
 
@@ -400,7 +422,26 @@ boolean myTurn;
 				fill(0);
 				textSize(20);
 				text(symbol,myX*textx+textxplus,myY*texty+textyplus);
-				text("hp: "+hp,700,100);
+
+
+				//translate halth to flavor
+				textSize(15);
+				if(hp>9){
+					text("you feel on top of the world",520,100);
+				}
+				else if(hp>3){
+					text("you feel fine",520,100);
+
+				}
+				else if(hp>2){
+					text("you are injured",520,100);
+
+				}
+				else if (hp>0){
+					text("you are on death's doorstep",520,100);
+
+				}
+				textSize(20);
 			}
 
 			public void keyReader(){
