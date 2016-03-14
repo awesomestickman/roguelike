@@ -20,6 +20,9 @@ space[][] level;
 //////global counter for bresenham
 int bresCounter=0;
 
+//global for what part of game we on
+int gamecounter=0;
+
 
 //WARNING col=row, row=col
 int row=40;
@@ -38,16 +41,9 @@ boolean keyHolder;
 
 //setup
 public void setup(){
+size(800,800);
 
-
-level= new space[row][col];
-createSpace();
-createGrass();
-createStonewall();
-//createRacoon();
-//createDino();
-createAnteater();
-createPlayer();
+//creation();
 
 }
 
@@ -55,9 +51,12 @@ createPlayer();
 public void draw(){
 background(255);
 //background(0);
+
+if(gamecounter==1){
 updateall();
 
-
+}
+menu();
 
 
 }
@@ -174,21 +173,25 @@ boolean myTurn;
 			if(moving==true){
 
 				if(isValid(newX,newY)){
-					if(level[newX][newY].solidcheck==true){
+					//attacking others
+					//make sure not self
+					//if(newX!=myX&&newY!=myY){
+						if(level[newX][newY].solidcheck==true){
 
-						     
-						if(level[newX][newY].solidtype=="player"){
-							((player)level[newX][newY].solid).hp-=attack;
+							     
+							if(level[newX][newY].solidtype=="player"){
+								((player)level[newX][newY].solid).hp-=attack;
 
-						} 
-						if(level[newX][newY].solidtype=="anteater"){
-							((anteater)level[newX][newY].solid).hp-=attack;
+							} 
+							if(level[newX][newY].solidtype=="anteater"){
+								((anteater)level[newX][newY].solid).hp-=attack;
 
-						} 
-						
+							} 
+							
 
 
-					}
+						}
+				//	}
 
 
 
@@ -443,18 +446,18 @@ boolean myTurn;
 				//translate halth to flavor
 				textSize(15);
 				if(hp>9){
-					text("you feel on top of the world",520,100);
+					text("you feel on top of the world",590,100);
 				}
 				else if(hp>3){
-					text("you feel fine",520,100);
+					text("you feel fine",590,100);
 
 				}
 				else if(hp>2){
-					text("you are injured",520,100);
+					text("you are injured",590,100);
 
 				}
 				else if (hp>0){
-					text("you are on death's doorstep",520,100);
+					text("you are on death's doorstep",590,100);
 
 				}
 				textSize(20);
@@ -595,6 +598,8 @@ public void createPlayer(){
 	level[spawnx][spawny].solidcheck=true;     
 	level[spawnx][spawny].solidtype="player"; 
 	level[spawnx][spawny].solid= new player(spawnx,spawny,38,40,37,39);
+	((player)level[spawnx][spawny].solid).newX=spawnx;
+	((player)level[spawnx][spawny].solid).newY=spawny;
 }
 ////////////////////////////////////////////////////////////////////////
 public void updateall(){
@@ -627,6 +632,21 @@ for(int i =0;i<row;i++){
     	for(int r=0;r<col;r++){
 	    		level[i][r].visible=false;
 	    }
+}
+//if player?
+int yesorno=0;
+for(int i =0;i<row;i++){
+    	for(int r=0;r<col;r++){
+	    		if(level[i][r].solidcheck==true){
+	    			if(level[i][r].solidtype=="player"){
+	    				yesorno=1;
+	    			}
+	    		}
+	    	}
+	    }
+if(yesorno==0){
+
+	gamecounter=2;
 }
 
 //then calculate LOS
@@ -773,6 +793,12 @@ public void keyReleased(){
 
 	keyreset=true;
 	keyHolder=false;
+	if(gamecounter==0||gamecounter==2){
+		if(keyCode==82){
+	gamecounter=1;
+	creation();
+}
+}
 }
 
 
@@ -1078,8 +1104,47 @@ public int sign(int x){
   return 1;
   
 }
-  public void settings() { 
-size(800,800); }
+
+
+public void creation(){
+
+
+
+	level= new space[row][col];
+createSpace();
+createGrass();
+createStonewall();
+createRacoon();
+//createDino();
+createAnteater();
+createPlayer();
+}
+
+public void menu(){
+if(gamecounter==0){
+	fill(0,153,0);
+			textSize(20);
+	text("Press r to play.", 400, 400);
+
+}
+if(gamecounter==2){
+	fill(0,153,0);
+			textSize(20);
+	text("The alligators got you.", 400, 400);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+}
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "roguelike" };
     if (passedArgs != null) {
